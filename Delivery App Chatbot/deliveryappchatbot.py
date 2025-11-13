@@ -1,59 +1,55 @@
 import re
 import random
-import order
-
-menu_loop_running = True
+from order import Order
 
 def welcome_user():
-    print("Hi there! Sorry your delivery hasn't arrived as expected; let's get this sorted.")
+    print("\nHi there! Sorry your delivery hasn't arrived as expected; let's get this sorted.")
 
 def display_menu():
     while True:
-        user_choice = input(f'Hi, please choose from the following options:\n'
-        '1. Check delivery status\n2. Request delay reason\n3. Estimated time of arrival\n4. Resolution options\n5. Connect with human support\n6. Exit the conversation\n\n')
+        print('-----------------------------------------')
+        user_choice = input(f'Please choose from the following options:\n'
+        '1) Estimated time of arrival\n2) Request delay reason\n3) Resolution options\n4) Connect with human support\n5) Exit the conversation\n\n')
         print()
-        if re.match('^[1-6]$', user_choice):
+        if re.match('^[1-5]$', user_choice):
             return int(user_choice)
         else: 
-            print('Please enter an integer from 1-6.')
+            print('Please enter a choice from 1-5.')
 
-def handle_user_choice(user_choice):
+def handle_user_choice(user_choice, account):
+    order = account["current_order"]
+    is_premium = account["premium"]
     match user_choice:
         case 1:
-            pass
+            print(Order.get_ETA(order))
         case 2:
-            pass
+            print(Order.get_delay_reason(order))
         case 3:
-            pass
+            print(Order.get_resolution_options(order, is_premium))
+            print('We hope you are satisfied with the outcome!')
         case 4:
-            pass
+            print(Order.human_support(order))
         case 5:
-            pass
-        case 6:
-            global menu_loop_running
-            menu_loop_running = False
+            return False
+    return True
 
-def menu_loop():
-    while menu_loop_running:
+def menu_loop(account):
+    running = True
+    while running:
         user_choice = display_menu()
-        handle_user_choice(user_choice)
+        running = handle_user_choice(user_choice, account)
 
 def simulate_customer_account():
-    past_orders = []
-    subscribed_to_premium = False
-    for i in range(5):
-        order_ID = random.randint(100000, 999999) # Fix this to make sure every order ID is unique
-        past_orders.append(order(order_ID))
-    if random.randint(1, 10) <= 5:
-        subscribed_to_premium = True
-    return [past_orders, subscribed_to_premium]
+    subscribed_to_premium = random.randint(0, 1) == 1
+    order = Order()
+    return {"current_order":order, "premium":subscribed_to_premium}
 
-def start():
+def main():
     welcome_user()
-    menu_loop()
+    menu_loop(simulate_customer_account())
 
 if __name__ == '__main__':
     try:
-        start()
-    except KeyboardInterrupt as e:
+        main()
+    except KeyboardInterrupt:
         print ('Goodbye')
